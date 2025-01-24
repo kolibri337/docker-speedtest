@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+
+  fluentd:
+    build:
+      context: ./fluentd
+      dockerfile: Dockerfile
+    image: final_fluentd
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    ports:
+      - 24224:24224
+    volumes:
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+    networks:
+      - lan
+
+
+  elasticsearch:
+    image: elasticsearch:8.16.3
+    expose:
+      - 9200
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    networks:
+      - lan
+
+  kibana:
+    image: kibana:8.16.3
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - lan
+
+networks:
+  lan:
+    external: true
