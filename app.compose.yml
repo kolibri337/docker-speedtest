@@ -6,17 +6,19 @@ services:
     build: speedtest/.
     container_name: speedtest_app
     environment:
-      - TELEMETRY=true
-      - TITLE=test
-      - MODE=frontend
-      - PASSWORD=password
-      - ENABLE_ID_OBFUSCATION=true
-      - REDACT_IP_ADDRESSES=false
-      - DB_TYPE=postgresql
-      - DB_NAME=speedtest
-      - DB_HOSTNAME=postgresql
-      - DB_USERNAME=root
-      - DB_PASSWORD=password
+      - TELEMETRY=${TELEMETRY}
+      - TITLE=${TITLE}
+      - MODE=${MODE}
+      - PASSWORD=${PASSWORD}
+      - ENABLE_ID_OBFUSCATION=${ENABLE_ID_OBFUSCATION}
+      - REDACT_IP_ADDRESSES=${REDACT_IP_ADDRESSES}
+      - DB_TYPE=${DB_TYPE}
+      - DB_NAME=${DB_NAME}
+      - DB_HOSTNAME=${DB_HOSTNAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
     volumes:
       - ./speedtest/docker/servers.json:/speedtest/servers.json
     depends_on:
@@ -25,7 +27,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: localhost:24224
+        fluentd-address: ${FLUENTD_ADDRESS}
         tag: app
     networks:
       - lan
@@ -36,9 +38,9 @@ services:
     image: postgres:16
     container_name: speedtest_db
     environment:
-      POSTGRES_USER: "root"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "speedtest"
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./speedtest/results/telemetry_postgresql.sql:/docker-entrypoint-initdb.d/telemetry_postgresql.sql
@@ -47,7 +49,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: localhost:24224
+        fluentd-address: ${FLUENTD_ADDRESS}
         tag: db
     networks:
       - lan
@@ -66,7 +68,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: localhost:24224
+        fluentd-address: ${FLUENTD_ADDRESS}
         tag: proxy
     networks:
       - lan

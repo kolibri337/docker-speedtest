@@ -20,8 +20,8 @@ services:
       timeout: 5s
       retries: 5
     environment:
-      - ELASTICSEARCH_HOST=elasticsearch
-      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
     networks:
       - lan
 
@@ -51,15 +51,6 @@ services:
       - elasticsearch
     ports:
       - 5601:5601
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200  # Исправлено
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=5601
-      - NODE_OPTIONS=--max-old-space-size=512
-    deploy:
-      resources:
-        limits:
-          memory: 512M
     networks:
       - lan
 
