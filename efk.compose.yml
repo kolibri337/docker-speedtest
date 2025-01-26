@@ -1,7 +1,7 @@
-version: '3.9'
+---
+version: '3.8'
 
 services:
-
   fluentd:
     build:
       context: ./fluentd
@@ -9,30 +9,24 @@ services:
     image: final_fluentd
     depends_on:
       - elasticsearch
-    links:
-      - elasticsearch
     ports:
-      - 24224:24224
+      - "24224:24224"
+      - "24224:24224/udp"
     volumes:
       - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:24224/api/plugins.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
     networks:
       - lan
 
-
   elasticsearch:
     image: elasticsearch:8.16.3
-    expose:
-      - 9200
-    ports:
-      - 9200:9200
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
@@ -46,7 +40,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
+    ports:
+      - 9200:9200
     networks:
       - lan
 
@@ -54,10 +49,13 @@ services:
     image: kibana:8.16.3
     depends_on:
       - elasticsearch
-    links:
-      - elasticsearch
     ports:
       - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200  # Исправлено
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=5601
+      - NODE_OPTIONS=--max-old-space-size=512
     deploy:
       resources:
         limits:

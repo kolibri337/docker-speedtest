@@ -1,32 +1,10 @@
-version: '3.9'
+---
+version: '3.8'
 
 services:
-
-  proxy:
-    image: nginx:1.24.0
-    container_name: speedtest_proxy
-    ports:
-      - "8080:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - speedtest
-      - fluentd
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        tag: proxy
-    networks:
-      - lan
-
-  speedtest:
-    build:
-      context: ./speedtest
-      dockerfile: Dockerfile
-    image: php-fpm
-    depends_on:
-      - postgresql
+  app:
+    build: speedtest/.
+    container_name: speedtest_app
     environment:
       - TELEMETRY=true
       - TITLE=test
@@ -40,40 +18,63 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=password
     volumes:
-      - ./speedtest/servers.json:/servers.json
+      - ./speedtest/docker/servers.json:/speedtest/servers.json
+    depends_on:
+      - db
+      - fluentd
     logging:
-      driver: fluentd
+      driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: speedtest
+        tag: app
     networks:
       - lan
+    expose:
+      - "80"
 
-  postgresql:
-    image: postgres
+  db:
+    image: postgres:16
+    container_name: speedtest_db
     environment:
       POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "speedtest"
-    expose:
-      - "5432"
-    ports:
-      - "5432:5432"
     volumes:
-        - db_data:/var/lib/postgresql/data
-        - ./speedtest/results/telemetry_postgresql.sql:/docker-entrypoint-initdb.d/telemetry_postgresql.sql
+      - db_data:/var/lib/postgresql/data
+      - ./speedtest/results/telemetry_postgresql.sql:/docker-entrypoint-initdb.d/telemetry_postgresql.sql
+    depends_on:
+      - fluentd
     logging:
-      driver: fluentd
+      driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: postgresql
+        tag: db
+    networks:
+      - lan
 
+  proxy:
+    image: nginx:1.24.0
+    container_name: speedtest_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./speedtest:/var/www/html/speedtest:ro
+    depends_on:
+      - app
+      - fluentd
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: proxy
     networks:
       - lan
 
 networks:
   lan:
     external: true
+    name: lan
 
 volumes:
   db_data:

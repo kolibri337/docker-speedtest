@@ -1,5 +1,7 @@
-FROM php:8-apache
-# Install extensions
+# Этап сборки
+FROM php:8-fpm AS builder
+
+# Установка системных зависимостей
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -12,20 +14,25 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /speedtest/
-#Prepare files and folders
+# Копирование исходного кода
 COPY backend/ /speedtest/backend/
 COPY results/*.php results/*.ttf  /speedtest/results/
 COPY *.js favicon.ico /speedtest/
 COPY docker/*.php /speedtest/
 COPY docker/entrypoint.sh /
 
+# Этап финального образа
+FROM php:8-fpm
+
+# Копирование необходимых файлов из этапа сборки
+COPY --from=builder /speedtest/ /speedtest/
+COPY --from=builder /entrypoint.sh /entrypoint.sh
+
+# Установка переменных окружения
 ENV WEBPORT=80
 
-#https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
-STOPSIGNAL SIGWINCH
-#Ensure the entrypoint script is executable
-EXPOSE 80
+# Убедимся, что entrypoint.sh исполняемый
+RUN chmod +x /entrypoint.sh
+
+# Запуск приложения
 CMD ["bash", "/entrypoint.sh"]
-
-
