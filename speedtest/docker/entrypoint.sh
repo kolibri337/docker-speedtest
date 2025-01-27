@@ -86,4 +86,4 @@ fi
 echo "Done, Starting APACHE"
 
 # This runs apache
-exec apache2-foreground
+apache2-foreground

@@ -14,16 +14,16 @@ services:
       - "24224:24224/udp"
     volumes:
       - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:24224/api/plugins.json"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     environment:
       - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
       - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
     networks:
       - lan
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   elasticsearch:
     image: elasticsearch:8.16.3
@@ -31,6 +31,7 @@ services:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1

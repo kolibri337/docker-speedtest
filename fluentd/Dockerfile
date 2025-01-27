@@ -8,7 +8,8 @@ RUN apt-get update && \
         build-essential \
         ruby-dev \
         make \
-        gcc && \
+        gcc \
+        curl && \
     gem update --system && \
     gem install elasticsearch -v 8.5.1 && \
     gem install fluent-plugin-elasticsearch -v 5.4.0 && \

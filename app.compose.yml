@@ -23,7 +23,6 @@ services:
       - ./speedtest/docker/servers.json:/speedtest/servers.json
     depends_on:
       - db
-      - fluentd
     logging:
       driver: "fluentd"
       options:
@@ -44,8 +43,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./speedtest/results/telemetry_postgresql.sql:/docker-entrypoint-initdb.d/telemetry_postgresql.sql
-    depends_on:
-      - fluentd
     logging:
       driver: "fluentd"
       options:
@@ -58,13 +55,12 @@ services:
     image: nginx:1.24.0
     container_name: speedtest_proxy
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./speedtest:/var/www/html/speedtest:ro
     depends_on:
       - app
-      - fluentd
     logging:
       driver: "fluentd"
       options:

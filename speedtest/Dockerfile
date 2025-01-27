@@ -22,7 +22,7 @@ COPY docker/*.php /speedtest/
 COPY docker/entrypoint.sh /
 
 # Этап финального образа
-FROM php:8-fpm
+FROM php:8-apache
 
 # Копирование необходимых файлов из этапа сборки
 COPY --from=builder /speedtest/ /speedtest/
