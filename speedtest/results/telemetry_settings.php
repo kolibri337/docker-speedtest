@@ -3,7 +3,7 @@
 // Type of db: "mssql", "mysql", "sqlite" or "postgresql"
 $db_type = 'mysql';
 // Password to login to stats.php. Change this!!!
-$stats_password = 'PASSWORD';
+$stats_password = 'pass';
 // If set to true, test IDs will be obfuscated to prevent users from guessing URLs of other tests
 $enable_id_obfuscation = false;
 // If set to true, IP addresses will be redacted from IP and ISP info fields, as well as the log
@@ -29,7 +29,7 @@ $MySql_databasename = 'DB_NAME';
 $MySql_port = '3306';
 
 // Postgresql settings
-$PostgreSql_username = 'USERNAME';
-$PostgreSql_password = 'PASSWORD';
-$PostgreSql_hostname = 'DB_HOSTNAME';
-$PostgreSql_databasename = 'DB_NAME';
+$PostgreSql_username="root";
+$PostgreSql_password="pass";
+$PostgreSql_hostname="postgresql";
+$PostgreSql_databasename="speedtest";
