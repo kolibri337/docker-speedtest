@@ -28,11 +28,12 @@ FROM php:8-apache
 COPY --from=builder /speedtest/ /speedtest/
 COPY --from=builder /entrypoint.sh /entrypoint.sh
 
-# Установка переменных окружения
-ENV WEBPORT=80
 
 # Убедимся, что entrypoint.sh исполняемый
 RUN chmod +x /entrypoint.sh
+
+# Установка переменной окружения
+ENV WEBPORT=80
 
 # Запуск приложения
 CMD ["bash", "/entrypoint.sh"]
