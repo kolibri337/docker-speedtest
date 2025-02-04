@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y \
 
 # Копирование исходного кода
 COPY backend/ /speedtest/backend/
-COPY results/*.php results/*.ttf  /speedtest/results/
+COPY results/*.php /speedtest/results/
+COPY results/*.ttf /speedtest/results/
 COPY *.js favicon.ico /speedtest/
 COPY docker/*.php /speedtest/
 COPY docker/entrypoint.sh /
